@@ -3,13 +3,15 @@ package com.example.sampleapplication
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.kmmchart.ui.Chart
+import com.example.kmmchart.ui.chartData
 import com.example.sampleapplication.ui.theme.KMMChartTheme
 
 class SampleActivity : ComponentActivity() {
@@ -17,27 +19,26 @@ class SampleActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             KMMChartTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    Greeting("Android")
-                }
+                GreetingPreview()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
-    KMMChartTheme {
-        Greeting("Android")
-    }
+    Chart(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(360.dp),
+        backgroundColor = Color.LightGray,
+        barsColor = Color.Black,
+        barsSize = 5,
+        chartData = chartData(
+            xValues = arrayListOf(160, 40, 50),
+            yValues = arrayListOf(1, 40, 4, 4)
+        ),
+        maxValue = 6,
+    )
 }
