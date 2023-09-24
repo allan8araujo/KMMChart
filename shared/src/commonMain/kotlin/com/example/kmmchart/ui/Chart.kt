@@ -2,7 +2,9 @@ package com.example.kmmchart.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.material.MaterialTheme
@@ -26,7 +28,8 @@ fun KMMChart(
     maxValue: Int,
     backgroundColor: Color = MaterialTheme.colors.surface,
     barsColor: Color = MaterialTheme.colors.surface,
-    ylabelsAmount: Int = 6,
+    ylabelsAmount: Int = 8,
+    xlabelsAmount: Int = 8,
     barsSize: Int = 2
 ) {
     Surface(
@@ -34,57 +37,54 @@ fun KMMChart(
         color = backgroundColor
     ) {
         val yValuesSorted = chartData.values.sortedByDescending { it }
+
         val isAllPositives = yValuesSorted.isAllPositives()
         val isAllNegatives = yValuesSorted.isAllNegatives()
-        val halfOfYlabelsAmount = ylabelsAmount / 2
+
+        val ylabelsAmountList = (1..(ylabelsAmount / 2)).toList()
+        val kekwylabelsAmount = ylabelsAmount / 2
 
         Row {
-            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                for (num in 1..halfOfYlabelsAmount) {
-                    Text(text = (yValuesSorted.first() / num).roundToInt().toString())
-                    Spacer(Modifier.weight(1f))
-                }
-
-                Text(
-                    text = 0.toString()
-                )
-
-                for (num in 1..halfOfYlabelsAmount) {
-                    Spacer(Modifier.weight(1f))
-                    Text(
-                        text = (yValuesSorted.last() / (halfOfYlabelsAmount - num + 1))
-                            .roundToInt()
-                            .toString(),
-                    )
-                }
-            }
+            setupYTexts(
+                yValuesList = ylabelsAmountList,
+                ylabelsAmount = kekwylabelsAmount,
+                yValuesSorted = yValuesSorted,
+                isAllPositives = isAllPositives,
+                isAllNegatives = isAllNegatives
+            )
 
             val modifierNegativeNumbers =
                 if (isAllPositives) Modifier
+                else Modifier.weight(1f)
+
+            val modifierPositiveNumbers =
+                if (isAllNegatives) Modifier
                 else Modifier.weight(1f)
 
             chartData.forEach { yValue ->
                 val isNegative = yValue.value.isNegative()
 
                 val filledPercentage =
-                    if (isNegative) abs(yValue.value / maxValue) else yValue.value / maxValue
+                    if (isNegative) abs(yValue.value) / abs(maxValue)
+                    else yValue.value / maxValue
                 val emptyPercentage =
-                    if (isNegative) abs(1 - filledPercentage) else 1 - filledPercentage
+                    if (isNegative) 1 + abs(filledPercentage)
+                    else 1 + filledPercentage
 
                 if (isNegative) Column(Modifier.weight(1f).align(Alignment.Top)) {
-                    Spacer(Modifier.weight(1f))
+                    SpacerStandard()
                     Column(Modifier.weight(1f)) {
                         Text(
                             modifier = Modifier.align(Alignment.CenterHorizontally),
                             text = yValue.key.roundToInt().toString()
                         )
                         Row(modifier = Modifier.weight(filledPercentage)) {
-                            Spacer(Modifier.weight(1f))
+                            SpacerStandard()
                             Row(
                                 Modifier.weight(1f).background(color = barsColor)
                                     .fillMaxHeight()
                             ) {}
-                            Spacer(Modifier.weight(1f))
+                            SpacerStandard()
                         }
                         Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
                     }
@@ -93,12 +93,13 @@ fun KMMChart(
                         Column(Modifier.weight(1f)) {
                             Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
                             Row(modifier = Modifier.weight(filledPercentage.orMinValueIfZero())) {
-                                Spacer(Modifier.weight(1f))
+                                SpacerStandard()
                                 Row(
-                                    Modifier.weight(1f).background(color = barsColor)
+                                    Modifier.weight(1f)
+                                        .background(color = barsColor)
                                         .fillMaxHeight()
                                 ) {}
-                                Spacer(Modifier.weight(1f))
+                                SpacerStandard()
                             }
                         }
                         Column(modifierNegativeNumbers.align(Alignment.CenterHorizontally)) {
@@ -110,3 +111,56 @@ fun KMMChart(
         }
     }
 }
+
+@Composable
+private fun RowScope.setupYTexts(
+    yValuesList: List<Int>,
+    yValuesSorted: List<Float>,
+    isAllPositives: Boolean,
+    isAllNegatives: Boolean,
+    ylabelsAmount: Int
+) {
+    Column(modifier = Modifier.Companion.align(Alignment.CenterVertically)) {
+
+        if (!isAllNegatives) setupPositivesY(yValuesList, yValuesSorted, ylabelsAmount)
+        Text(text = "0")
+        if (!isAllPositives) setupNegativesY(yValuesList, yValuesSorted, ylabelsAmount)
+    }
+}
+
+@Composable
+private fun ColumnScope.setupNegativesY(
+    yValuesList: List<Int>,
+    yValuesSorted: List<Float>,
+    ylabelsAmount: Int
+) {
+    val negativeYLabelsList = yValuesList.sortedDescending()
+    negativeYLabelsList.forEach {
+        SpacerStandard()
+        val yText =
+            (yValuesSorted.last() / ylabelsAmount) * (ylabelsAmount - it + 1)
+
+        Text(text = yText.roundToInt().toString())
+    }
+}
+
+@Composable
+private fun ColumnScope.setupPositivesY(
+    yValuesList: List<Int>,
+    yValuesSorted: List<Float>,
+    ylabelsAmount: Int
+) {
+    yValuesList.forEach {
+        val yText =
+            (yValuesSorted.first() / ylabelsAmount) * (ylabelsAmount - it + 1)
+
+        Text(text = yText.roundToInt().toString())
+        SpacerStandard()
+    }
+}
+
+@Composable
+fun ColumnScope.SpacerStandard() = Spacer(Modifier.weight(1f))
+
+@Composable
+fun RowScope.SpacerStandard() = Spacer(Modifier.weight(1f))

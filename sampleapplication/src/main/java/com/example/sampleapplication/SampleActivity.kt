@@ -29,8 +29,8 @@ class SampleActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun KMMChart() {
-    val xValues = (-4..8).map { it.toFloat() }
-    val yValues = xValues.map { it + 2 }
+    val xValues = (-1 downTo -16).map { it.toFloat() }
+    val yValues = xValues.map { it }
     val maxYValue = yValues.max()
     val chartData = xValues.zip(yValues).toMap()
 
