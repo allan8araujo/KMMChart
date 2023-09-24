@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.kmmchart.ui.KMMChart
-import com.example.kmmchart.ui.chartData
 import com.example.sampleapplication.ui.theme.KMMChartTheme
 import kotlin.math.roundToInt
 
@@ -30,9 +29,10 @@ class SampleActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun KMMChart() {
-    val xValues = arrayListOf(160f, 40f, 50f, 16f, 180f, 1000f, -100f, -400f, -600f, -1000f, -2200f)
-    val yValues = arrayListOf(1f, 40f, 4f, 4f)
-    val maxValue = xValues.max()
+    val xValues = (-4..8).map { it.toFloat() }
+    val yValues = xValues.map { it + 2 }
+    val maxYValue = yValues.max()
+    val chartData = xValues.zip(yValues).toMap()
 
     KMMChart(
         modifier = Modifier
@@ -42,10 +42,7 @@ fun KMMChart() {
         backgroundColor = Color.LightGray,
         barsColor = Color.Black,
         barsSize = 5,
-        chartData = chartData(
-            xValues = xValues,
-            yValues = yValues
-        ),
-        maxValue = maxValue.roundToInt(),
+        chartData = chartData,
+        maxValue = maxYValue.roundToInt(),
     )
 }
