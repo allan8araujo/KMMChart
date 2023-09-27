@@ -7,13 +7,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import com.example.kmmchart.ui.commons.isAllNegatives
 import com.example.kmmchart.ui.commons.isAllPositives
 import com.example.kmmchart.ui.commons.isNegative
@@ -26,12 +29,15 @@ fun KMMChart(
     modifier: Modifier,
     chartData: Map<Float, Float>,
     maxValue: Int,
+    minValue: Int,
     backgroundColor: Color = MaterialTheme.colors.surface,
     barsColor: Color = MaterialTheme.colors.surface,
     ylabelsAmount: Int = 8,
     xlabelsAmount: Int = 8,
-    barsSize: Int = 2
+    roundedCorner: Dp? = null,
+    barsSize: Float = 0.7f
 ) {
+
     Surface(
         modifier = modifier,
         color = backgroundColor
@@ -41,95 +47,189 @@ fun KMMChart(
         val isAllPositives = yValuesSorted.isAllPositives()
         val isAllNegatives = yValuesSorted.isAllNegatives()
 
-        val ylabelsAmountList = (1..(ylabelsAmount / 2)).toList()
-        val kekwylabelsAmount = ylabelsAmount / 2
+        val yLabelsAmountList = (1..(ylabelsAmount / 2)).toList()
+        val halfOfYLabelAmount = ylabelsAmount / 2
 
         Row {
-            setupYTexts(
-                yValuesList = ylabelsAmountList,
-                ylabelsAmount = kekwylabelsAmount,
+            SetupYTexts(
+                yValuesList = yLabelsAmountList,
+                ylabelsAmount = halfOfYLabelAmount,
                 yValuesSorted = yValuesSorted,
                 isAllPositives = isAllPositives,
                 isAllNegatives = isAllNegatives
             )
 
-            val modifierNegativeNumbers =
+            val modifierOnlyNegativeValues =
                 if (isAllPositives) Modifier
                 else Modifier.weight(1f)
 
-            val modifierPositiveNumbers =
+            val modifierOnlyPositiveValues =
                 if (isAllNegatives) Modifier
                 else Modifier.weight(1f)
 
-            chartData.forEach { yValue ->
-                val isNegative = yValue.value.isNegative()
+            SetupKMMChart(
+                chartData = chartData,
+                minValue = minValue,
+                maxValue = maxValue,
+                modifierOnlyPositiveValues = modifierOnlyPositiveValues,
+                barsSize = barsSize,
+                barsColor = barsColor,
+                modifierOnlyNegativeValues = modifierOnlyNegativeValues,
+                roundedCorner = roundedCorner
+            )
+        }
+    }
+}
 
-                val filledPercentage =
-                    if (isNegative) abs(yValue.value) / abs(maxValue)
-                    else yValue.value / maxValue
-                val emptyPercentage =
-                    if (isNegative) 1 + abs(filledPercentage)
-                    else 1 + filledPercentage
+@Composable
+private fun RowScope.SetupKMMChart(
+    chartData: Map<Float, Float>,
+    minValue: Int,
+    maxValue: Int,
+    modifierOnlyPositiveValues: Modifier,
+    barsSize: Float,
+    barsColor: Color,
+    modifierOnlyNegativeValues: Modifier,
+    roundedCorner: Dp?,
+) {
+    chartData.forEach { yValue ->
+        val isNegative = yValue.value.isNegative()
 
-                if (isNegative) Column(Modifier.weight(1f).align(Alignment.Top)) {
-                    SpacerStandard()
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterHorizontally),
-                            text = yValue.key.roundToInt().toString()
-                        )
-                        Row(modifier = Modifier.weight(filledPercentage)) {
-                            SpacerStandard()
-                            Row(
-                                Modifier.weight(1f).background(color = barsColor)
-                                    .fillMaxHeight()
-                            ) {}
-                            SpacerStandard()
-                        }
-                        Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
-                    }
-                } else {
-                    Column(Modifier.weight(1f).align(Alignment.Bottom)) {
-                        Column(Modifier.weight(1f)) {
-                            Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
-                            Row(modifier = Modifier.weight(filledPercentage.orMinValueIfZero())) {
-                                SpacerStandard()
-                                Row(
-                                    Modifier.weight(1f)
-                                        .background(color = barsColor)
-                                        .fillMaxHeight()
-                                ) {}
-                                SpacerStandard()
-                            }
-                        }
-                        Column(modifierNegativeNumbers.align(Alignment.CenterHorizontally)) {
-                            Text(text = yValue.key.roundToInt().toString())
-                        }
-                    }
-                }
+        val filledPercentage =
+            if (isNegative) abs(yValue.value) / abs(minValue)
+            else yValue.value / maxValue
+        val emptyPercentage =
+            if (isNegative) 1 - abs(filledPercentage)
+            else 1 - filledPercentage
+
+        if (isNegative) Column(Modifier.weight(1f).align(Alignment.Top)) {
+
+            Spacer(modifier = modifierOnlyPositiveValues)
+
+            Column(Modifier.weight(1f)) {
+                SetupXTexts(yValue = yValue)
+
+                SetupNegativeBars(
+                    emptyPercentage = emptyPercentage,
+                    filledPercentage = filledPercentage,
+                    barsSize = barsSize,
+                    barsColor = barsColor,
+                )
+            }
+        } else {
+
+            Column(Modifier.weight(1f).align(Alignment.Bottom)) {
+
+                SetupPositiveBars(
+                    emptyPercentage = emptyPercentage,
+                    filledPercentage = filledPercentage,
+                    barsSize = barsSize,
+                    barsColor = barsColor,
+                    modifierOnlyNegativeValues = modifierOnlyNegativeValues,
+                    yValue = yValue,
+                    roundedCorner = roundedCorner
+                )
             }
         }
     }
 }
 
 @Composable
-private fun RowScope.setupYTexts(
+private fun ColumnScope.SetupPositiveBars(
+    emptyPercentage: Float,
+    filledPercentage: Float,
+    barsSize: Float,
+    barsColor: Color,
+    modifierOnlyNegativeValues: Modifier,
+    yValue: Map.Entry<Float, Float>,
+    roundedCorner: Dp?
+) {
+    val modifier =
+        if (roundedCorner != null) Modifier.clip(
+            shape = RoundedCornerShape(topStart = roundedCorner, topEnd = roundedCorner)
+        )
+        else Modifier
+
+    Column(Modifier.weight(1f)) {
+
+        Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
+
+        Row(modifier = Modifier.weight(filledPercentage.orMinValueIfZero())) {
+            Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
+
+            Row(
+                modifier.weight(barsSize)
+                    .background(color = barsColor)
+                    .fillMaxHeight()
+            ) {}
+
+            Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
+        }
+    }
+
+    Column(modifierOnlyNegativeValues.align(Alignment.CenterHorizontally)) {
+
+        Text(text = yValue.key.roundToInt().toString())
+    }
+}
+
+@Composable
+private fun ColumnScope.SetupNegativeBars(
+    filledPercentage: Float,
+    barsSize: Float,
+    barsColor: Color,
+    emptyPercentage: Float
+) {
+    Row(modifier = Modifier.weight(filledPercentage)) {
+
+        Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
+
+        Row(
+            Modifier
+                .weight(barsSize)
+                .background(color = barsColor)
+                .fillMaxHeight()
+        ) {}
+
+        Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
+    }
+
+    Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
+}
+
+@Composable
+private fun ColumnScope.SetupXTexts(yValue: Map.Entry<Float, Float>) {
+    Text(
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        text = yValue.key.roundToInt().toString()
+    )
+}
+
+@Composable
+private fun RowScope.SetupYTexts(
     yValuesList: List<Int>,
     yValuesSorted: List<Float>,
     isAllPositives: Boolean,
     isAllNegatives: Boolean,
     ylabelsAmount: Int
 ) {
-    Column(modifier = Modifier.Companion.align(Alignment.CenterVertically)) {
-
-        if (!isAllNegatives) setupPositivesY(yValuesList, yValuesSorted, ylabelsAmount)
+    Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+        if (!isAllNegatives) setupPositivesYLabels(
+            yValuesList = yValuesList,
+            yValuesSorted = yValuesSorted,
+            ylabelsAmount = ylabelsAmount
+        )
         Text(text = "0")
-        if (!isAllPositives) setupNegativesY(yValuesList, yValuesSorted, ylabelsAmount)
+        if (!isAllPositives) setupNegativesYLabels(
+            yValuesList = yValuesList,
+            yValuesSorted = yValuesSorted,
+            ylabelsAmount = ylabelsAmount
+        )
     }
 }
 
 @Composable
-private fun ColumnScope.setupNegativesY(
+private fun ColumnScope.setupNegativesYLabels(
     yValuesList: List<Int>,
     yValuesSorted: List<Float>,
     ylabelsAmount: Int
@@ -145,7 +245,7 @@ private fun ColumnScope.setupNegativesY(
 }
 
 @Composable
-private fun ColumnScope.setupPositivesY(
+private fun ColumnScope.setupPositivesYLabels(
     yValuesList: List<Int>,
     yValuesSorted: List<Float>,
     ylabelsAmount: Int
