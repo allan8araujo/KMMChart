@@ -51,8 +51,8 @@ fun KMMChart() {
             roundedCorner = 12.dp
         )
 
-        val xValues2 = (1..12).map { it.toFloat() }
-        val yValues2 = xValues.map { -it * it }
+        val xValues2 = (-5..12).map { it.toFloat() }
+        val yValues2 = xValues.map { it * it }
         val maxYValue2 = yValues2.max()
         val minYValue2 = yValues2.min()
         val chartData2 = xValues2.zip(yValues2).toMap()
@@ -63,7 +63,7 @@ fun KMMChart() {
                 .padding(2.dp),
             backgroundColor = Color.LightGray,
             barsColor = Color.Black,
-            barsSize = 1f,
+            barsSize = 0.7f,
             chartData = chartData2,
             maxValue = maxYValue2.roundToInt(),
             minValue = minYValue2.roundToInt(),

@@ -67,75 +67,59 @@ fun KMMChart(
                 if (isAllNegatives) Modifier
                 else Modifier.weight(1f)
 
-            SetupKMMChart(
-                chartData = chartData,
-                minValue = minValue,
-                maxValue = maxValue,
-                modifierOnlyPositiveValues = modifierOnlyPositiveValues,
-                barsSize = barsSize,
-                barsColor = barsColor,
-                modifierOnlyNegativeValues = modifierOnlyNegativeValues,
-                roundedCorner = roundedCorner
-            )
-        }
-    }
-}
+            chartData.forEach { graphMap ->
+                val isYPositive = !graphMap.value.isNegative()
+                val isXPositive = !graphMap.key.isNegative()
 
-@Composable
-private fun RowScope.SetupKMMChart(
-    chartData: Map<Float, Float>,
-    minValue: Int,
-    maxValue: Int,
-    modifierOnlyPositiveValues: Modifier,
-    barsSize: Float,
-    barsColor: Color,
-    modifierOnlyNegativeValues: Modifier,
-    roundedCorner: Dp?,
-) {
-    chartData.forEach { yValue ->
-        val isNegative = yValue.value.isNegative()
+                val isQ1 = isYPositive && isXPositive
+                val isQ2 = isYPositive && !isXPositive
+                val isQ3 = !isYPositive && !isXPositive
+                val isQ4 = !isYPositive && isXPositive
 
-        val filledPercentage =
-            if (isNegative) abs(yValue.value) / abs(minValue)
-            else yValue.value / maxValue
-        val emptyPercentage =
-            if (isNegative) 1 - abs(filledPercentage)
-            else 1 - filledPercentage
+                val filledPercentage =
+                    if (!isYPositive) abs(graphMap.value) / abs(minValue)
+                    else abs(graphMap.value) / abs(maxValue)
 
-        if (isNegative) Column(Modifier.weight(1f).align(Alignment.Top)) {
+                val emptyPercentage =
+                    if (!isYPositive) abs(1 - filledPercentage)
+                    else 1 - abs(filledPercentage)
 
-            Spacer(modifier = modifierOnlyPositiveValues)
+                if (isQ4) Column(Modifier.weight(1f).align(Alignment.Top)) {
 
-            Column(Modifier.weight(1f)) {
-                SetupXTexts(yValue = yValue)
+                    Spacer(modifier = modifierOnlyPositiveValues)
 
-                SetupNegativeBars(
-                    emptyPercentage = emptyPercentage,
-                    filledPercentage = filledPercentage,
-                    barsSize = barsSize,
-                    barsColor = barsColor,
-                )
-            }
-        } else {
+                    Column(Modifier.weight(1f)) {
+                        SetupXTexts(yValue = graphMap)
 
-            Column(Modifier.weight(1f).align(Alignment.Bottom)) {
+                        SetupQ4Bars(
+                            emptyPercentage = emptyPercentage,
+                            filledPercentage = filledPercentage,
+                            barsSize = barsSize,
+                            barsColor = barsColor,
+                        )
+                    }
+                } else if (isQ1) {
 
-                SetupPositiveBars(
-                    emptyPercentage = emptyPercentage,
-                    filledPercentage = filledPercentage,
-                    barsSize = barsSize,
-                    barsColor = barsColor,
-                    modifierOnlyNegativeValues = modifierOnlyNegativeValues,
-                    yValue = yValue,
-                    roundedCorner = roundedCorner
-                )
+                    Column(Modifier.weight(1f).align(Alignment.Bottom)) {
+
+                        SetupQ1Bars(
+                            emptyPercentage = emptyPercentage,
+                            filledPercentage = filledPercentage,
+                            barsSize = barsSize,
+                            barsColor = barsColor,
+                            modifierOnlyNegativeValues = modifierOnlyNegativeValues,
+                            yValue = graphMap,
+                            roundedCorner = roundedCorner
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ColumnScope.SetupPositiveBars(
+private fun ColumnScope.SetupQ1Bars(
     emptyPercentage: Float,
     filledPercentage: Float,
     barsSize: Float,
@@ -174,7 +158,7 @@ private fun ColumnScope.SetupPositiveBars(
 }
 
 @Composable
-private fun ColumnScope.SetupNegativeBars(
+private fun ColumnScope.SetupQ4Bars(
     filledPercentage: Float,
     barsSize: Float,
     barsColor: Color,
