@@ -3,6 +3,10 @@ This project is a Kotlin Multiplatform Mobile (KMM) aimed at offering a versatil
 
 ## Features
 **Cross-Platform Compatibility**: Built with KMM, this library ensures seamless integration and consistent behavior on both iOS and Android platforms.
+
 Versatile Chart Types: The library supports a variety of chart types, including line charts, bar charts, pie charts, and more, catering to diverse data visualization needs.
+
 **Customization Options**: Developers have the flexibility to customize the appearance and behavior of charts to suit their application's design and user experience requirements.
+
 **Efficient Rendering**: Optimized rendering ensures smooth performance even with large datasets, providing a responsive and engaging user experience.
+![image](https://github.com/allan8araujo/KMMChart/assets/77680596/a7a59b23-b589-4925-87eb-1bbabf6b9dec)
