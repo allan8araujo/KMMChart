@@ -34,7 +34,7 @@ fun KMMChart(
     barsColor: Color = MaterialTheme.colors.surface,
     ylabelsAmount: Int = 8,
     xlabelsAmount: Int = 8,
-    roundedCorner: Dp? = null,
+    barRoundedCorner: Dp? = null,
     barsSize: Float = 0.7f
 ) {
 
@@ -72,8 +72,6 @@ fun KMMChart(
                 val isXPositive = !graphMap.key.isNegative()
 
                 val isQ1 = isYPositive && isXPositive
-                val isQ2 = isYPositive && !isXPositive
-                val isQ3 = !isYPositive && !isXPositive
                 val isQ4 = !isYPositive && isXPositive
 
                 val filledPercentage =
@@ -109,7 +107,7 @@ fun KMMChart(
                             barsColor = barsColor,
                             modifierOnlyNegativeValues = modifierOnlyNegativeValues,
                             yValue = graphMap,
-                            roundedCorner = roundedCorner
+                            roundedCorner = barRoundedCorner
                         )
                     }
                 }

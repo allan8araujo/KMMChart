@@ -6,7 +6,7 @@ package com.example.kmmchart.ui.commons
  *
  * @return The Float value, or [Float.MIN_VALUE] if the calling Float is zero.
  */
-internal fun Float.orMinValueIfZero() = if (this == 0f) Float.MIN_VALUE else this
+internal fun Float.orMinValueIfZero() = if (this.isNaN()) Float.MIN_VALUE else this
 
 /**
  * Checks whether the calling Float is negative.

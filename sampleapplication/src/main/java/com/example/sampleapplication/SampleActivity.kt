@@ -30,29 +30,29 @@ class SampleActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 fun KMMChart() {
-    val xValues = (1 .. 12).map { it.toFloat() }
-    val yValues = xValues.map { it*it }
+    val xValues = (1..12).map { it.toFloat() }
+    val yValues = xValues.map { it * it }
     val maxYValue = yValues.max()
     val minYValue = yValues.min()
     val chartData = xValues.zip(yValues).toMap()
 
     Column {
-        KMMChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(360.dp)
-                .padding(2.dp),
-            backgroundColor = Color.LightGray,
-            barsColor = Color.Black,
-            barsSize = 0.7f,
-            chartData = chartData,
-            maxValue = maxYValue.roundToInt(),
-            minValue = minYValue.roundToInt(),
-            roundedCorner = 12.dp
-        )
+//        KMMChart(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(360.dp)
+//                .padding(2.dp),
+//            backgroundColor = Color.LightGray,
+//            barsColor = Color.Black,
+//            barsSize = 0.7f,
+//            barRoundedCorner = 12.dp,
+//            chartData = chartData,
+//            maxValue = maxYValue.roundToInt(),
+//            minValue = minYValue.roundToInt()
+//        )
 
-        val xValues2 = (-5..12).map { it.toFloat() }
-        val yValues2 = xValues.map { it * it }
+        val xValues2 = (-12..12).map { it.toFloat() }
+        val yValues2 = xValues2.map { it - 12 }
         val maxYValue2 = yValues2.max()
         val minYValue2 = yValues2.min()
         val chartData2 = xValues2.zip(yValues2).toMap()
