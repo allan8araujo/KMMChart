@@ -51,11 +51,12 @@ fun KMMChart() {
 //            minValue = minYValue.roundToInt()
 //        )
 
-        val xValues2 = (-12..12).map { it.toFloat() }
-        val yValues2 = xValues2.map { it - 12 }
+        val xValues2 = (0..10).map { it.toFloat() }
+        val yValues2 = xValues2.map { it }
         val maxYValue2 = yValues2.max()
         val minYValue2 = yValues2.min()
         val chartData2 = xValues2.zip(yValues2).toMap()
+
         KMMChart(
             modifier = Modifier
                 .fillMaxWidth()
@@ -67,6 +68,8 @@ fun KMMChart() {
             chartData = chartData2,
             maxValue = maxYValue2.roundToInt(),
             minValue = minYValue2.roundToInt(),
+            ylabelsVisibility = false,
+            xlabelsVisibility = false,
         )
     }
 }
