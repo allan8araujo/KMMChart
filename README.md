@@ -9,4 +9,18 @@ Versatile Chart Types: The library supports a variety of chart types, including 
 **Customization Options**: Developers have the flexibility to customize the appearance and behavior of charts to suit their application's design and user experience requirements.
 
 **Efficient Rendering**: Optimized rendering ensures smooth performance even with large datasets, providing a responsive and engaging user experience.
-![image](https://github.com/allan8araujo/KMMChart/assets/77680596/a7a59b23-b589-4925-87eb-1bbabf6b9dec)
+
+
+## Supported graphs
+
+Bar Chart
+
+## Future implementations (Not supported yet)
+
+Line Chart, 
+Pie Chart,
+Scatter plot 
+and maybe a Doughnut Chart
+
+![image](https://github.com/allan8araujo/KMMChart/assets/77680596/e8751db6-6b99-4e5a-acd7-ffe0caedebfa)
+
