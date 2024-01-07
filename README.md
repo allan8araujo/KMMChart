@@ -22,5 +22,6 @@ Pie Chart,
 Scatter plot 
 and maybe a Doughnut Chart
 
-![image](https://github.com/allan8araujo/KMMChart/assets/77680596/e8751db6-6b99-4e5a-acd7-ffe0caedebfa)
+![image](https://github.com/allan8araujo/KMMChart/assets/77680596/2924f416-4195-4b0a-bed5-8d89ae4f3e78) ![image](https://github.com/allan8araujo/KMMChart/assets/77680596/db72d6cf-0a4b-45d9-b1cb-c1cc8054d2e1)
+
 
