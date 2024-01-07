@@ -26,7 +26,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @Composable
-fun KMMChart(
+fun BarChart(
     modifier: Modifier,
     chartData: Map<Float, Float>,
     maxValue: Int,
@@ -34,7 +34,6 @@ fun KMMChart(
     backgroundColor: Color = MaterialTheme.colors.surface,
     barsColor: Color = MaterialTheme.colors.surface,
     ylabelsAmount: Int = 8,
-    xlabelsAmount: Int = 8,
     xlabelsVisibility: Boolean = false,
     ylabelsVisibility: Boolean = false,
     barRoundedCorner: Dp? = null,
@@ -51,8 +50,9 @@ fun KMMChart(
     ) {
         val yValuesSorted = chartData.values.sortedByDescending { it }
 
-        val isAllPositives = yValuesSorted.isAllPositives()
-        val isAllNegatives = yValuesSorted.isAllNegatives()
+        val onlyPositives = yValuesSorted.isAllPositives()
+        val onlyNegatives = yValuesSorted.isAllNegatives()
+        val positivesAndNegatives = !onlyPositives && !onlyNegatives
 
         val yLabelsAmountList = (1..(ylabelsAmount / 2)).toList()
         val halfOfYLabelAmount = ylabelsAmount / 2
@@ -63,24 +63,24 @@ fun KMMChart(
                 yValuesList = yLabelsAmountList,
                 ylabelsAmount = halfOfYLabelAmount,
                 yValuesSorted = yValuesSorted,
-                isAllPositives = isAllPositives,
-                isAllNegatives = isAllNegatives
+                onlyPositives = onlyPositives,
+                onlyNegatives = onlyNegatives
             )
 
-            val modifierForOnlyPositiveValues = if (isAllPositives) Modifier
+            val modifierForOnlyPositiveValues = if (onlyPositives) Modifier
             else Modifier.weight(1f)
 
-            val modifierForOnlyNegativeValues = if (isAllNegatives) Modifier
+            val modifierForOnlyNegativeValues = if (onlyNegatives) Modifier
             else Modifier.weight(1f)
 
             chartData.forEach { graphMap ->
 
                 val isYPositive =
-                    if (graphMap.value != 0.0f) !graphMap.value.isNegative() else isAllPositives
+                    if (graphMap.value != 0.0f) !graphMap.value.isNegative() else onlyPositives
                 val isXPositive = !graphMap.key.isNegative()
 
                 val isQ1 = isYPositive && isXPositive
-                val isQ4 = !isYPositive && isXPositive
+                val isQ4 = !isYPositive
 
                 val filledPercentage = if (!isYPositive) abs(graphMap.value) / abs(minValue)
                 else abs(graphMap.value) / abs(maxValue)
@@ -88,11 +88,12 @@ fun KMMChart(
                 val emptyPercentage = if (!isYPositive) abs(1 - filledPercentage.orMinValueIfZero())
                 else 1 - abs(filledPercentage.orMinValueIfZero())
 
-                val roundedModifier = if (barRoundedCorner != null) Modifier.clip(
-                    shape = RoundedCornerShape(
-                        topStart = barRoundedCorner, topEnd = barRoundedCorner
+                val roundedModifier = barRoundedCorner?.let {
+                    Modifier.clip(
+                        shape = if (isQ1) RoundedCornerShape(topStart = it, topEnd = it)
+                        else RoundedCornerShape(bottomStart = it, bottomEnd = it)
                     )
-                ) else Modifier
+                } ?: Modifier
 
                 if (isQ4) Column(Modifier.weight(1f).align(Alignment.Top)) {
 
@@ -121,7 +122,8 @@ fun KMMChart(
                             modifierOnlyNegativeValues = modifierForOnlyPositiveValues,
                             chartData = graphMap,
                             roundedModifier = roundedModifier,
-                            xlabelsVisibility = xlabelsVisibility
+                            xlabelsVisibility = xlabelsVisibility,
+                            positivesAndNegatives = positivesAndNegatives
                         )
                     }
                 }
@@ -139,7 +141,8 @@ private fun ColumnScope.SetupQ1Bars(
     modifierOnlyNegativeValues: Modifier,
     chartData: Map.Entry<Float, Float>,
     xlabelsVisibility: Boolean,
-    roundedModifier: Modifier
+    roundedModifier: Modifier,
+    positivesAndNegatives: Boolean
 ) {
 
     ColumnEmpty(emptyPercentage = emptyPercentage)
@@ -154,7 +157,8 @@ private fun ColumnScope.SetupQ1Bars(
     XLabels(
         chartData = chartData,
         labelVisibility = xlabelsVisibility,
-        onlyThoseValuesModifier = modifierOnlyNegativeValues
+        onlyThoseValuesModifier = modifierOnlyNegativeValues,
+        positivesAndNegatives = positivesAndNegatives
     )
 }
 
@@ -173,7 +177,7 @@ private fun ColumnScope.SetupQ4Bars(
     XLabels(
         chartData = chartData,
         labelVisibility = xlabelsVisibility,
-        onlyThoseValuesModifier = onlyNegativeValuesModifier
+        onlyThoseValuesModifier = onlyNegativeValuesModifier,
     )
 
     ColumnBar(
@@ -217,36 +221,37 @@ private fun ColumnScope.XLabels(
     chartData: Map.Entry<Float, Float>,
     labelVisibility: Boolean,
     onlyThoseValuesModifier: Modifier,
+    positivesAndNegatives: Boolean = false,
 ) {
-    Spacer(modifier = onlyThoseValuesModifier)
-
+    if (!positivesAndNegatives) Spacer(modifier = onlyThoseValuesModifier)
     Text(
         modifier = Modifier.align(Alignment.CenterHorizontally),
         text = if (labelVisibility) chartData.key.roundToInt()
             .toString() else ChartConstants.Strings.EMPTY
     )
+    if (positivesAndNegatives) SpacerStandard()
 }
 
 @Composable
 private fun RowScope.SetupYTexts(
     yValuesList: List<Int>,
     yValuesSorted: List<Float>,
-    isAllPositives: Boolean,
-    isAllNegatives: Boolean,
+    onlyPositives: Boolean,
+    onlyNegatives: Boolean,
     ylabelsAmount: Int,
     ylabelsVisibility: Boolean
 ) {
 
     Column(modifier = Modifier.align(Alignment.CenterVertically)) {
 
-        if (!isAllNegatives) setupPositivesYLabels(
+        if (!onlyNegatives) setupPositivesYLabels(
             yValuesList = yValuesList,
             yValuesSorted = yValuesSorted,
             ylabelsAmount = ylabelsAmount,
             ylabelsVisibility = ylabelsVisibility
         )
 
-        if (!isAllPositives) setupNegativesYLabels(
+        if (!onlyPositives) setupNegativesYLabels(
             yValuesList = yValuesList,
             yValuesSorted = yValuesSorted,
             ylabelsAmount = ylabelsAmount,
