@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
+import com.example.kmmchart.domain.ChartConstants
 import com.example.kmmchart.ui.commons.isAllNegatives
 import com.example.kmmchart.ui.commons.isAllPositives
 import com.example.kmmchart.ui.commons.isNegative
@@ -34,14 +35,15 @@ fun KMMChart(
     barsColor: Color = MaterialTheme.colors.surface,
     ylabelsAmount: Int = 8,
     xlabelsAmount: Int = 8,
-    xlabelsVisibility: Boolean = true,
-    ylabelsVisibility: Boolean = true,
+    xlabelsVisibility: Boolean = false,
+    ylabelsVisibility: Boolean = false,
     barRoundedCorner: Dp? = null,
     barsSize: Float = 0.7f,
     noSizeLimit: Boolean = false,
 ) {
+
     if (!noSizeLimit) require(chartData.size <= 12) {
-        "ChartData can only support size up to 12, if you want to increase this limit enable the 'noSizeLimit' to true. It can lead to performance issues so don't say i didn't warn you. Also is recommended to set ylabelsVisibility to false and xlabelsVisibility"
+        ChartConstants.Warnings.CHART_LIMIT_SIZE
     }
 
     Surface(
@@ -86,14 +88,20 @@ fun KMMChart(
                 val emptyPercentage = if (!isYPositive) abs(1 - filledPercentage.orMinValueIfZero())
                 else 1 - abs(filledPercentage.orMinValueIfZero())
 
-                if (isQ4) Column(Modifier.weight(1f).align(Alignment.Top)) {
+                val roundedModifier = if (barRoundedCorner != null) Modifier.clip(
+                    shape = RoundedCornerShape(
+                        topStart = barRoundedCorner, topEnd = barRoundedCorner
+                    )
+                ) else Modifier
 
+                if (isQ4) Column(Modifier.weight(1f).align(Alignment.Top)) {
 
                     Column(Modifier.weight(1f)) {
 
                         SetupQ4Bars(
-                            modifierForOnlyNegativeValues = modifierForOnlyNegativeValues,
-                            graphMap = graphMap,
+                            onlyNegativeValuesModifier = modifierForOnlyNegativeValues,
+                            roundedModifier = roundedModifier,
+                            chartData = graphMap,
                             emptyPercentage = emptyPercentage,
                             filledPercentage = filledPercentage,
                             barsSize = barsSize,
@@ -111,8 +119,8 @@ fun KMMChart(
                             barsSize = barsSize,
                             barsColor = barsColor,
                             modifierOnlyNegativeValues = modifierForOnlyPositiveValues,
-                            yValue = graphMap,
-                            roundedCorner = barRoundedCorner,
+                            chartData = graphMap,
+                            roundedModifier = roundedModifier,
                             xlabelsVisibility = xlabelsVisibility
                         )
                     }
@@ -129,74 +137,75 @@ private fun ColumnScope.SetupQ1Bars(
     barsSize: Float,
     barsColor: Color,
     modifierOnlyNegativeValues: Modifier,
-    yValue: Map.Entry<Float, Float>,
-    roundedCorner: Dp?,
-    xlabelsVisibility: Boolean
+    chartData: Map.Entry<Float, Float>,
+    xlabelsVisibility: Boolean,
+    roundedModifier: Modifier
 ) {
-    val modifier = if (roundedCorner != null) Modifier.clip(
-        shape = RoundedCornerShape(topStart = roundedCorner, topEnd = roundedCorner)
+
+    ColumnEmpty(emptyPercentage = emptyPercentage)
+
+    ColumnBar(
+        roundedModifier = roundedModifier,
+        filledPercentage = filledPercentage,
+        barsSize = barsSize,
+        barsColor = barsColor
     )
-    else Modifier
 
-    Column(Modifier.weight(1f)) {
-
-        Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
-
-        Row(modifier = Modifier.weight(filledPercentage.orMinValueIfZero())) {
-            Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
-
-            Row(
-                modifier.weight(barsSize).background(color = barsColor).fillMaxHeight()
-            ) {}
-
-            Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
-        }
-    }
-
-    Column(modifierOnlyNegativeValues.align(Alignment.CenterHorizontally)) {
-
-        Text(text = if (xlabelsVisibility) yValue.key.roundToInt().toString() else "")
-
-    }
+    XLabels(
+        chartData = chartData,
+        labelVisibility = xlabelsVisibility,
+        onlyThoseValuesModifier = modifierOnlyNegativeValues
+    )
 }
 
 @Composable
 private fun ColumnScope.SetupQ4Bars(
+    onlyNegativeValuesModifier: Modifier,
+    roundedModifier: Modifier,
     filledPercentage: Float,
     barsSize: Float,
     barsColor: Color,
     emptyPercentage: Float,
-    graphMap: Map.Entry<Float, Float>,
+    chartData: Map.Entry<Float, Float>,
     xlabelsVisibility: Boolean,
-    modifierForOnlyNegativeValues: Modifier
 ) {
 
-    Spacer(modifier = modifierForOnlyNegativeValues)
-    SetupXTexts(
-        yValue = graphMap, xlabelsVisibility = xlabelsVisibility
+    XLabels(
+        chartData = chartData,
+        labelVisibility = xlabelsVisibility,
+        onlyThoseValuesModifier = onlyNegativeValuesModifier
     )
 
     ColumnBar(
-        filledPercentage = filledPercentage, barsSize = barsSize, barsColor = barsColor
+        roundedModifier = roundedModifier,
+        filledPercentage = filledPercentage,
+        barsSize = barsSize,
+        barsColor = barsColor
     )
+
     ColumnEmpty(emptyPercentage = emptyPercentage)
 }
 
 @Composable
 private fun ColumnScope.ColumnEmpty(emptyPercentage: Float) {
-    Spacer(modifier = Modifier.Companion.weight(emptyPercentage.orMinValueIfZero()))
+
+    Spacer(modifier = Modifier.weight(emptyPercentage.orMinValueIfZero()))
 }
 
 @Composable
 private fun ColumnScope.ColumnBar(
-    filledPercentage: Float, barsSize: Float, barsColor: Color
+    roundedModifier: Modifier,
+    filledPercentage: Float,
+    barsSize: Float,
+    barsColor: Color
 ) {
-    Row(modifier = Modifier.Companion.weight(filledPercentage.orMinValueIfZero())) {
+
+    Row(modifier = Modifier.weight(filledPercentage.orMinValueIfZero())) {
 
         Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
 
         Row(
-            Modifier.weight(barsSize).background(color = barsColor).fillMaxHeight()
+            roundedModifier.weight(barsSize).background(color = barsColor).fillMaxHeight()
         ) {}
 
         Spacer(modifier = Modifier.weight((1 - barsSize).orMinValueIfZero()))
@@ -204,16 +213,18 @@ private fun ColumnScope.ColumnBar(
 }
 
 @Composable
-private fun ColumnScope.SetupXTexts(
-    yValue: Map.Entry<Float, Float>,
-    xlabelsVisibility: Boolean,
+private fun ColumnScope.XLabels(
+    chartData: Map.Entry<Float, Float>,
+    labelVisibility: Boolean,
+    onlyThoseValuesModifier: Modifier,
 ) {
-//    if (isAllNegatives) SpacerStandard()
+    Spacer(modifier = onlyThoseValuesModifier)
+
     Text(
         modifier = Modifier.align(Alignment.CenterHorizontally),
-        text = if (xlabelsVisibility) yValue.key.roundToInt().toString() else ""
+        text = if (labelVisibility) chartData.key.roundToInt()
+            .toString() else ChartConstants.Strings.EMPTY
     )
-//    if (isAllPositives) SpacerStandard()
 }
 
 @Composable
@@ -225,13 +236,16 @@ private fun RowScope.SetupYTexts(
     ylabelsAmount: Int,
     ylabelsVisibility: Boolean
 ) {
+
     Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+
         if (!isAllNegatives) setupPositivesYLabels(
             yValuesList = yValuesList,
             yValuesSorted = yValuesSorted,
             ylabelsAmount = ylabelsAmount,
             ylabelsVisibility = ylabelsVisibility
         )
+
         if (!isAllPositives) setupNegativesYLabels(
             yValuesList = yValuesList,
             yValuesSorted = yValuesSorted,
@@ -248,12 +262,19 @@ private fun ColumnScope.setupNegativesYLabels(
     ylabelsAmount: Int,
     ylabelsVisibility: Boolean
 ) {
+
     val negativeYLabelsList = yValuesList.sortedDescending()
+
     negativeYLabelsList.forEach {
+
         SpacerStandard()
+
         val yText = (yValuesSorted.last() / ylabelsAmount) * (ylabelsAmount - it + 1)
 
-        Text(text = if (ylabelsVisibility) yText.roundToInt().toString() else "")
+        Text(
+            text = if (ylabelsVisibility) yText.roundToInt()
+                .toString() else ChartConstants.Strings.EMPTY
+        )
     }
 }
 
@@ -264,16 +285,19 @@ private fun ColumnScope.setupPositivesYLabels(
     ylabelsAmount: Int,
     ylabelsVisibility: Boolean
 ) {
+
     yValuesList.forEach {
+
         val yText = (yValuesSorted.first() / ylabelsAmount) * (ylabelsAmount - it + 1)
 
-        Text(text = if (ylabelsVisibility) yText.roundToInt().toString() else "")
+        Text(
+            text = if (ylabelsVisibility) yText.roundToInt()
+                .toString() else ChartConstants.Strings.EMPTY
+        )
+
         SpacerStandard()
     }
 }
 
 @Composable
-fun ColumnScope.SpacerStandard() = Spacer(Modifier.weight(1f))
-
-@Composable
-fun RowScope.SpacerStandard() = Spacer(Modifier.weight(1f))
+internal fun ColumnScope.SpacerStandard() = Spacer(Modifier.weight(1f))

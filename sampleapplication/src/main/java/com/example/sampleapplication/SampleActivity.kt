@@ -37,19 +37,20 @@ fun KMMChart() {
     val chartData = xValues.zip(yValues).toMap()
 
     Column {
-//        KMMChart(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(360.dp)
-//                .padding(2.dp),
-//            backgroundColor = Color.LightGray,
-//            barsColor = Color.Black,
-//            barsSize = 0.7f,
-//            barRoundedCorner = 12.dp,
-//            chartData = chartData,
-//            maxValue = maxYValue.roundToInt(),
-//            minValue = minYValue.roundToInt()
-//        )
+        KMMChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(360.dp)
+                .padding(2.dp),
+
+            backgroundColor =Color(0xFF3F51B5),
+            barsColor = Color(0xFFF5F5F5),
+            barsSize = 0.7f,
+            barRoundedCorner = 12.dp,
+            chartData = chartData,
+            maxValue = maxYValue.roundToInt(),
+            minValue = minYValue.roundToInt()
+        )
 
         val xValues2 = (0..10).map { it.toFloat() }
         val yValues2 = xValues2.map { it }
@@ -62,14 +63,14 @@ fun KMMChart() {
                 .fillMaxWidth()
                 .height(360.dp)
                 .padding(2.dp),
-            backgroundColor = Color.LightGray,
-            barsColor = Color.Black,
+            backgroundColor = Color.White,
+            barsColor = Color.DarkGray,
             barsSize = 0.7f,
             chartData = chartData2,
             maxValue = maxYValue2.roundToInt(),
             minValue = minYValue2.roundToInt(),
-            ylabelsVisibility = false,
-            xlabelsVisibility = false,
+            xlabelsVisibility = true,
+            ylabelsVisibility = true
         )
     }
 }
