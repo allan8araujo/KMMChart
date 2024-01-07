@@ -1,4 +1,4 @@
-package com.example.kmmchart
+package com.limao6.kmmchart
 
 import platform.UIKit.UIDevice
 

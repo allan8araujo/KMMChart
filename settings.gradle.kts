@@ -30,6 +30,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "KMMChart"
+rootProject.name = "kmmgraph-demo"
 include(":shared")
 include(":sampleapplication")

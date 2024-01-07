@@ -12,9 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.kmmchart.ui.KMMChart
 import com.example.sampleapplication.ui.theme.KMMChartTheme
 import kotlin.math.roundToInt
+import com.limao6.kmmchart.barchart.ui.KMMChart
 
 class SampleActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -44,7 +44,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.example.kmmchart"
+    namespace = "com.limao6.kmmgraph"
     compileSdk = 34
 
     defaultConfig {

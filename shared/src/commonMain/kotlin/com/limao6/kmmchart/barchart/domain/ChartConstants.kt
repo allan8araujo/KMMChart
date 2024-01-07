@@ -1,4 +1,4 @@
-package com.example.kmmchart.domain
+package com.limao6.kmmchart.barchart.domain
 
 object ChartConstants {
     object Strings {

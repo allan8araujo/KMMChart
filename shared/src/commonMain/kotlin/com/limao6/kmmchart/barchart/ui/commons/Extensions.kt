@@ -1,4 +1,4 @@
-package com.example.kmmchart.ui.commons
+package com.limao6.kmmchart.barchart.ui.commons
 
 /**
  * A utility function that returns the minimum positive value if the calling Float is zero.

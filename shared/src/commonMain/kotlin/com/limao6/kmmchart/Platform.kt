@@ -1,4 +1,4 @@
-package com.example.kmmchart
+package com.limao6.kmmchart
 
 interface Platform {
     val name: String

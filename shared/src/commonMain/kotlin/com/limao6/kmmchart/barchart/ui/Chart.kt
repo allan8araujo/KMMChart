@@ -1,4 +1,4 @@
-package com.example.kmmchart.ui
+package com.limao6.kmmchart.barchart.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -17,11 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
-import com.example.kmmchart.domain.ChartConstants
-import com.example.kmmchart.ui.commons.isAllNegatives
-import com.example.kmmchart.ui.commons.isAllPositives
-import com.example.kmmchart.ui.commons.isNegative
-import com.example.kmmchart.ui.commons.orMinValueIfZero
+import com.limao6.kmmchart.barchart.domain.ChartConstants
+import com.limao6.kmmchart.barchart.ui.commons.isAllNegatives
+import com.limao6.kmmchart.barchart.ui.commons.isAllPositives
+import com.limao6.kmmchart.barchart.ui.commons.isNegative
+import com.limao6.kmmchart.barchart.ui.commons.orMinValueIfZero
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
